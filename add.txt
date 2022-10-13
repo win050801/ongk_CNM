@@ -42,7 +42,21 @@
             <label for="">Số lượng</label>
             <input class="form-control" type="number" name="so_luong">
         </div>
-        
+        <div class="form-group">
+            <label for="">Image</label>
+            <input class="form-control" type="text" name="img">
+        </div>
+        <% if(typeof errors !='undefined') 
+        {%>
+            <% for(let err of errors) 
+                {%>
+                    <h6 class="text-danger">
+                        <%=err%>
+                    </h6>
+                <%} 
+            %>
+        <%} 
+        %>
         <div class="form-group">
             <label for=""></label>
             <input class="btn btn-primary" type="submit" value="Thêm sản phẩm">

@@ -39,15 +39,38 @@ app.get('/',(request,response)=>{
 app.get("/them",(request,response)=>{
     return response.render("add")
 })
+const validate = (ma_sp,ten_sp,so_luong)=>{
+    const erros=[]
+    if(!ma_sp||!ten_sp||!so_luong)
+    {
+        erros.push("Vui long dien day du thong tin")
+    }
+    if(parseInt(ma_sp)<0)
+    {
+        erros.push("Ma san pham >0")
+    }
+    if(parseInt(so_luong)<0)
+    {
+        erros.push("So luong >0")
+    }
+
+    return erros
+}
 app.post("/them",upload.fields([]),(request,response)=>{
-    const{ma_sp,ten_sp,so_luong} = request.body
-    
+    const{ma_sp,ten_sp,so_luong,img} = request.body
+    const errors = validate(ma_sp, ten_sp, so_luong);
+    if(errors.length>0)
+    {
+        console.log(errors);
+        return response.render("add",{errors})
+    }
     const params = {
         TableName:tablename,
         Item:{
             ma_sp,
             ten_sp,
-            so_luong
+            so_luong,
+            img
         }
     }
     docClient.put(params,(err,data)=>{
@@ -60,6 +83,7 @@ app.post("/them",upload.fields([]),(request,response)=>{
         }
     })
 })
+
 
 app.post("/delete",upload.fields([]),(request,response)=>{
     const{ma_sp} = request.body
