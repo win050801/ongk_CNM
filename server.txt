@@ -1,0 +1,88 @@
+const { request, response } = require("express")
+const express = require("express")
+const app = express()
+app.use(express.json({extended:false}))
+app.use(express.static('./views'))
+app.set('view engine','ejs')
+app.set('views','./views')
+
+const AWS = require('aws-sdk')
+const config =new AWS.Config({
+    accessKeyId:'AKIAZ2OYAWYVLUICT6A3',
+    secretAccessKey:'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',
+    region:'us-west-2'
+
+})
+AWS.config = config
+const docClient = new AWS.DynamoDB.DocumentClient()
+const tablename = 'SanPham'
+const multer = require('multer')
+const upload = multer()
+
+
+
+app.get('/',(request,response)=>{
+    const params = {
+        TableName:tablename,
+    }
+    docClient.scan(params,(err,data)=>{
+        if(err)
+        {
+            response.send('Error')
+        }
+        else
+        {
+            return response.render('index',{sanPhams:data.Items})
+        }
+    })
+})
+app.get("/them",(request,response)=>{
+    return response.render("add")
+})
+app.post("/them",upload.fields([]),(request,response)=>{
+    const{ma_sp,ten_sp,so_luong} = request.body
+    
+    const params = {
+        TableName:tablename,
+        Item:{
+            ma_sp,
+            ten_sp,
+            so_luong
+        }
+    }
+    docClient.put(params,(err,data)=>{
+        if(err)
+        {
+            response.send(err)
+        }
+        else{
+            return response.redirect("/")
+        }
+    })
+})
+
+app.post("/delete",upload.fields([]),(request,response)=>{
+    const{ma_sp} = request.body
+    const params={
+        TableName:tablename,
+        Key:{
+            ma_sp
+        }
+    }
+    docClient.delete(params,(err,data)=>{
+        if(err)
+        {
+            response.send(err)
+        }
+        else{
+            return response.redirect("/")
+        }
+    })
+    
+})
+
+
+
+app.listen(3000,()=>{
+    console.log('sever is run');
+})
